@@ -1,0 +1,4 @@
+data_ingestion:
+  data_source: "hf-vision/chest-xray-pneumonia"
+  cache_dir: "data/hf_cache"
+
