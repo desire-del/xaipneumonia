@@ -1,6 +1,23 @@
 data_ingestion:
   data_source: "data/chestxray"
   cache_dir: "data/hf_cache"
+  
+data_processing:
   batch_size: 8
+  normalize: true
+  augment: true
   image_size: [240, 240]
+  augmentation_config:
+    featurewise_center: False
+    samplewise_center: False
+    featurewise_std_normalization: False
+    samplewise_std_normalization: False
+    zca_whitening: False
+    rotation_range: 30
+    zoom_range: 0.2 
+    width_shift_range: 0.1
+    height_shift_range: 0.1
+    horizontal_flip: True
+    vertical_flip: False          
+
 

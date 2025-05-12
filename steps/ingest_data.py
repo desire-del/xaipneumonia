@@ -1,47 +1,26 @@
 import tensorflow as tf
 from typing import Tuple
 from zenml.steps import step
-from zenml.integrations.tensorflow.materializers.tf_dataset_materializer import TensorflowDatasetMaterializer
 from src.base.config_entity import DataIngestionConfig
 from src.log import logger
+from typing import Annotated
+from pathlib import Path
 
-@step(
-    enable_cache=False,
-    output_materializers={
-        "output_0": TensorflowDatasetMaterializer,
-        "output_1": TensorflowDatasetMaterializer,
-        "output_2": TensorflowDatasetMaterializer,
-    }
-)
-def ingestion(data_ingestion_config: DataIngestionConfig) -> Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset]:
+
+
+@step
+def ingestion(data_ingestion_config: DataIngestionConfig) -> Tuple[Annotated[Path, "train_dir"], Annotated[Path, "val_dir"], Annotated[Path, "test_dir"]]:
     """Load images from directories and return train, validation, and test tf.data.Dataset objects."""
-
-    def load_dataset(path: str) -> tf.data.Dataset:
-        return tf.keras.utils.image_dataset_from_directory(
-            path,
-            labels='inferred',
-            label_mode='int',
-            image_size=data_ingestion_config.image_size,
-            batch_size=data_ingestion_config.batch_size,
-            shuffle=True
-        )
-
+    logger.info("Data ingested successfully")
     try:
-        logger.info("Loading datasets from directories...")
-        train_ds = load_dataset(str(data_ingestion_config.data_source / "train"))
-        val_ds = load_dataset(str(data_ingestion_config.data_source / "val"))
-        test_ds = load_dataset(str(data_ingestion_config.data_source / "test"))
-
-        # Optimize performance
-        AUTOTUNE = tf.data.AUTOTUNE
-        train_ds = train_ds.prefetch(buffer_size=AUTOTUNE)
-        val_ds = val_ds.prefetch(buffer_size=AUTOTUNE)
-        test_ds = test_ds.prefetch(buffer_size=AUTOTUNE)
-
-        logger.success("Datasets loaded and optimized successfully.")
-
-        return train_ds, val_ds, test_ds
-
+        logger.info("Data ingested successfully")
+        train_dir = Path(data_ingestion_config.data_source) / "train"
+        val_dir = Path(data_ingestion_config.data_source) / "val"
+        test_dir = Path(data_ingestion_config.data_source) / "test"
+        logger.info(f"Train directory: {train_dir}")
+        logger.info(f"Validation directory: {val_dir}")
+        logger.info(f"Test directory: {test_dir}")
+        return train_dir, val_dir, test_dir
     except Exception as e:
-        logger.error(f"Failed to load datasets from directories: {e}")
+        logger.error(f"Error in data ingestion: {e}")
         raise e
