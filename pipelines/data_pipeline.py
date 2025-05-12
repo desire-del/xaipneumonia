@@ -1,16 +1,14 @@
-from zenml.pipelines import pipeline
+from zenml import pipeline
+from steps.ingest_data import ingestion
+from src.base.config_entity import DataIngestionConfig
+from typing import Tuple
+import tensorflow as tf
 
 
-def data_pipeline(
-    ingestion_step,
-    preprocessing_step
-):
-    """Define the data pipeline."""
+@pipeline
+def data_pipeline(config: DataIngestionConfig) -> Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset]:
+    """Pipeline to ingest data and return train, test, validation datasets."""
+    data = ingestion(config)
     
-    # Ingest data
-    dataset = ingestion_step()
-    
-    # Preprocess data
-    preprocessed_data = preprocessing_step(dataset=dataset)
-    
+
     

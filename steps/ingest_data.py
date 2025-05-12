@@ -1,23 +1,47 @@
+import tensorflow as tf
+from typing import Tuple
 from zenml.steps import step
-from datasets import load_dataset
-from datasets.dataset_dict import DatasetDict
+from zenml.integrations.tensorflow.materializers.tf_dataset_materializer import TensorflowDatasetMaterializer
+from src.base.config_entity import DataIngestionConfig
+from src.log import logger
 
+@step(
+    enable_cache=False,
+    output_materializers={
+        "output_0": TensorflowDatasetMaterializer,
+        "output_1": TensorflowDatasetMaterializer,
+        "output_2": TensorflowDatasetMaterializer,
+    }
+)
+def ingestion(data_ingestion_config: DataIngestionConfig) -> Tuple[tf.data.Dataset, tf.data.Dataset, tf.data.Dataset]:
+    """Load images from directories and return train, validation, and test tf.data.Dataset objects."""
 
-#@step
-def ingestion(hf_link : str) -> DatasetDict:
-    """Ingest data from a source."""
-    
-    print("Ingesting data...")
+    def load_dataset(path: str) -> tf.data.Dataset:
+        return tf.keras.utils.image_dataset_from_directory(
+            path,
+            labels='inferred',
+            label_mode='int',
+            image_size=data_ingestion_config.image_size,
+            batch_size=data_ingestion_config.batch_size,
+            shuffle=True
+        )
+
     try:
-        dataset = load_dataset(hf_link, cache_dir="data")
-    except Exception as e:
-        print(f"Error loading dataset: {e}")
-        return None
-    
-    # convert DatasetDict to tensorflow Dataset
-    
-    train = dataset["train"].with_format("tensorflow")
-    test = dataset["test"].with_format("tensorflow")
+        logger.info("Loading datasets from directories...")
+        train_ds = load_dataset(str(data_ingestion_config.data_source / "train"))
+        val_ds = load_dataset(str(data_ingestion_config.data_source / "val"))
+        test_ds = load_dataset(str(data_ingestion_config.data_source / "test"))
 
-    
-    return dataset
+        # Optimize performance
+        AUTOTUNE = tf.data.AUTOTUNE
+        train_ds = train_ds.prefetch(buffer_size=AUTOTUNE)
+        val_ds = val_ds.prefetch(buffer_size=AUTOTUNE)
+        test_ds = test_ds.prefetch(buffer_size=AUTOTUNE)
+
+        logger.success("Datasets loaded and optimized successfully.")
+
+        return train_ds, val_ds, test_ds
+
+    except Exception as e:
+        logger.error(f"Failed to load datasets from directories: {e}")
+        raise e

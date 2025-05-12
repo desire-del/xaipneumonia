@@ -16,7 +16,9 @@ class ConfigurationManager:
         create_directories([config.cache_dir])
 
         data_ingestion_config = DataIngestionConfig(
-            cache_dir = config.cache_dir,
-            data_source = Path(config.data_source)
+            cache_dir = Path(PROJECT_BASE_DIR / config.cache_dir),
+            data_source = Path(PROJECT_BASE_DIR / config.data_source),
+            batch_size= config.batch_size,
+            image_size= config.image_size
         )
         return data_ingestion_config

@@ -1,4 +1,6 @@
 data_ingestion:
-  data_source: "hf-vision/chest-xray-pneumonia"
+  data_source: "data/chestxray"
   cache_dir: "data/hf_cache"
+  batch_size: 8
+  image_size: [240, 240]
 
