@@ -11,6 +11,7 @@ class GradCAMExplainer(ImageExplainer):
     def __init__(self, model, last_conv_layer_name="block5_conv3", input_shape=(256, 256, 3)):
         super().__init__(model)
         self.last_conv_layer_name = last_conv_layer_name
+        self.input_shape = input_shape
 
     def get_gradcam_heatmap(self, img_array, pred_index=None):
         grad_model = tf.keras.models.Model(
@@ -31,16 +32,31 @@ class GradCAMExplainer(ImageExplainer):
         pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
         conv_outputs = conv_outputs[0]  # Shape (H, W, C)
 
-        #  Compute weighted sum over channels (correct Grad-CAM)
+        # Compute weighted sum over channels (correct Grad-CAM)
         heatmap = tf.reduce_sum(conv_outputs * pooled_grads, axis=-1)
 
         # Normalize between 0 and 1
         heatmap = tf.maximum(heatmap, 0) / (tf.reduce_max(heatmap) + tf.keras.backend.epsilon())
         return heatmap.numpy(), predictions
 
-    def explain(self, image_path, alpha=0.4, color_map="jet"):
+    def explain(self, image_path_or_array, alpha=0.4, color_map="jet"):
         # Load and preprocess image
-        img_array = preprocess_input(image_path)  # Should return shape (1, H, W, 3)
+        if isinstance(image_path_or_array, str):
+            img_array = preprocess_input(image_path_or_array)  # Should return shape (1, H, W, 3)
+        elif isinstance(image_path_or_array, np.ndarray):
+            if len(image_path_or_array.shape) == 3:  # Single image (H, W, C)
+                img_array = np.expand_dims(image_path_or_array, axis=0)
+            elif len(image_path_or_array.shape) == 4:  # Batch of images (N, H, W, C)
+                img_array = image_path_or_array
+            else:
+                raise ValueError("Input array must have shape (H,W,C) or (N,H,W,C)")
+            
+            # Ensure proper preprocessing if needed
+            if img_array.max() > 1.0:
+                img_array = img_array / 255.0
+        else:
+            raise ValueError("Input must be either a path string or numpy array")
+
         input_img = img_array[0]  # Remove batch dimension for visualization
 
         # Get Grad-CAM heatmap and prediction
@@ -58,8 +74,12 @@ class GradCAMExplainer(ImageExplainer):
 
         # Convert heatmap to float32 for blending
         heatmap_color = heatmap_color.astype(np.float32)
+        
+        # Ensure input image is in 0-255 range
         if input_img.max() <= 1.0:
             input_img = (input_img * 255).astype(np.uint8)
+        else:
+            input_img = input_img.astype(np.uint8)
 
         # Blend heatmap with original image
         superimposed_img = cv2.addWeighted(input_img.astype(np.float32), 1-alpha, heatmap_color, alpha, 0)
