@@ -3,10 +3,10 @@ data_ingestion:
   cache_dir: "data/hf_cache"
   
 data_processing:
-  batch_size: 8
+  batch_size: 16
   normalize: true
-  augment: true
-  image_size: [240, 240]
+  augment: false
+  image_size: [256, 256]
   augmentation_config:
     featurewise_center: False
     samplewise_center: False
@@ -18,6 +18,6 @@ data_processing:
     width_shift_range: 0.1
     height_shift_range: 0.1
     horizontal_flip: True
-    vertical_flip: False          
+    vertical_flip: False
 
 

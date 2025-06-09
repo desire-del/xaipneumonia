@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 
-@step
+#@step
 def ingestion(data_ingestion_config: DataIngestionConfig) -> Tuple[Annotated[Path, "train_dir"], Annotated[Path, "val_dir"], Annotated[Path, "test_dir"]]:
     """Load images from directories and return train, validation, and test tf.data.Dataset objects."""
     logger.info("Data ingested successfully")
