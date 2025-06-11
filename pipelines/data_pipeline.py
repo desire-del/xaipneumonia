@@ -12,9 +12,9 @@ def data_pipeline(ingestion_config, data_preprocess_config):
     """Pipeline to ingest data and return train, test, validation datasets."""
     try:
         train_dir, val_dir, test_dir = ingestion(ingestion_config)
-        train_ds, val_ds, index_to_class = preprocessing_step(train_dir, val_dir, data_preprocess_config)
+        train_ds, val_ds,test_ds, index_to_class = preprocessing_step(train_dir, val_dir,test_dir, data_preprocess_config)
         logger.info("Data pipeline completed successfully.")
-        return train_ds, val_ds, index_to_class
+        return train_ds, val_ds,test_ds, index_to_class
     except Exception as e:
         print(f"Error in data pipeline: {e}")
 

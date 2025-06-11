@@ -15,7 +15,7 @@ def train_model(
     logger.info("Building VGG16 model...")
 
     # Prétraitement des données
-    train_data, val_data, index_to_class = preprocessing_step(train_dir, val_dir, data_preprocess_config)
+    train_data, val_data,test_data, index_to_class = preprocessing_step(train_dir, val_dir, data_preprocess_config)
 
     # Définir l'input
     input_tensor = tf.keras.Input(shape=(256, 256, 3), name="input_image")

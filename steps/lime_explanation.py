@@ -30,7 +30,7 @@ class LIMEExplainer(ImageExplainer):
 
         def predict_fn(images):
             images = tf.convert_to_tensor(images / 255.0, dtype=tf.float32)
-            return self.model.predict(images)
+            return self.model.predict(images, verbose=0)
 
         # Génération de l’explication
         print("image_uint8 shape:", image_uint8.shape)

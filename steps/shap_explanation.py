@@ -33,7 +33,7 @@ class SHAPExplainer(ImageExplainer):
         
         return np.hstack([1-preds, preds])
     
-    def explain(self, image_path_or_array, num_samples=100):
+    def explain(self, image_path_or_array, num_samples=1000):
         """
         Explain the model's prediction using SHAP values.
         

@@ -29,6 +29,7 @@ def optimize_dataset(dataset: tf.data.Dataset, shuffle: bool = True) -> tf.data.
 def preprocessing_step(
     train_dir: Path,
     val_dir: Path,
+    test_dir: Path,
     config: DataPreprocessingConfig
 ):
     """Apply preprocessing using ImageDataGenerator with or without augmentation."""
@@ -60,6 +61,15 @@ def preprocessing_step(
         class_mode='binary'
     )
 
+    test_gen = datagen.flow_from_directory(
+        directory=str(test_dir),
+        target_size=config.image_size,
+        batch_size=config.batch_size,
+        shuffle=False,
+        color_mode='rgb',
+        class_mode='binary'
+    )
+
     # Récupération des classes
     class_indices: Dict[str, int] = train_gen.class_indices
     index_to_class = {v: k for k, v in class_indices.items()}
@@ -78,4 +88,4 @@ def preprocessing_step(
 
     logger.info("Prétraitement terminé avec succès.")
 
-    return train_gen, val_gen, index_to_class
+    return train_gen, val_gen,test_gen, index_to_class

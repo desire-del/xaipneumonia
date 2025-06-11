@@ -192,7 +192,7 @@ def handle_upload(contents):
 )
 def explain_lime(n, img):
     arr = np.array(img, dtype=np.float32)
-    res = lime_explainer.explain(arr, num_samples=100)
+    res = lime_explainer.explain(arr, num_samples=1500)
     
     # Get the LIME mask and normalize it
     lime_mask = res["lime_mask"]
@@ -240,7 +240,7 @@ def explain_shap(n, img):
     arr = np.array(img, dtype=np.float32)
     
     # Get SHAP explanation
-    explanation = shap_explainer.explain(arr)
+    explanation = shap_explainer.explain(arr, num_samples=1500)
     shap_values = explanation["shap_values"]
     predicted_class = explanation["predicted_class"]
     class_idx = 1 if predicted_class == "PNEUMONIA" else 0
