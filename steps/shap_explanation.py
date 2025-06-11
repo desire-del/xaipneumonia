@@ -77,7 +77,7 @@ class SHAPExplainer(ImageExplainer):
         return {
             "original_image": image_uint8,
             "pred_score": pred_scores,
-            "shap_values": self.shap_values.values[0],
+            "shap_values": self.shap_values,
             "predicted_class": pred_class
         }
     
