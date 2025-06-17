@@ -5,7 +5,7 @@ import matplotlib as mpl
 from src.base.xai_entity import ImageExplainer
 from .preprocess_input import preprocess_input
 from tensorflow.keras.utils import array_to_img, img_to_array
-
+from skimage.transform import resize
 
 class GradCAMExplainer(ImageExplainer):
     def __init__(self, model, last_conv_layer_name="block5_conv3", input_shape=(256, 256, 3)):
@@ -84,10 +84,12 @@ class GradCAMExplainer(ImageExplainer):
         # Blend heatmap with original image
         superimposed_img = cv2.addWeighted(input_img.astype(np.float32), 1-alpha, heatmap_color, alpha, 0)
         superimposed_img = np.uint8(superimposed_img)
+        target_shape = (256, 256)  # Resize to target shape if needed
+        resized_heatmap = resize(heatmap, target_shape, order=1, mode='reflect', preserve_range=True)
 
         return {
             "original_image": input_img,
             "pred_score": predictions.numpy(),
-            "heatmap": heatmap,
+            "heatmap": resized_heatmap,
             "superimposed_image": superimposed_img
         }

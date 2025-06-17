@@ -6,12 +6,12 @@ from .preprocess_input import preprocess_input
 
 
 class SHAPExplainer(ImageExplainer):
-    def __init__(self, model, input_shape=(256, 256, 3), class_names=['PNEUMONIA', 'NORMAL']):
+    def __init__(self, model, input_shape=(256, 256, 3), class_names=['PNEUMONIA', 'NORMAL'], mask_type="blur(8,8)"):
         super().__init__(model)
         self.input_shape = input_shape
         
         # Create a masker for SHAP - need to pass the full shape (H, W, C)
-        self.masker = shap.maskers.Image("blur(128,128)", input_shape)
+        self.masker = shap.maskers.Image(mask_type, input_shape)
         self.class_names = class_names
         # Create SHAP explainer
         self.explainer = shap.Explainer(
